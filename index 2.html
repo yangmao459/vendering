@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#0e1116" />
+<title>零号售货机</title>
+<style>
+:root{
+  --bg:#090b0f; --machine:#d9dde2; --machine2:#aeb5be; --edge:#737b86;
+  --glass:#091018; --screen:#0e141b; --ink:#eef3f6; --muted:#8c99a6;
+  --accent:#d4ff55; --accent2:#91cfff; --danger:#ff6e76; --shadow:rgba(0,0,0,.52);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:radial-gradient(circle at 50% -10%,#222a34 0,#10151c 42%,#07090c 100%);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);overflow:hidden}
+button{font:inherit;color:inherit}
+#app{height:100%;display:flex;align-items:center;justify-content:center;padding:14px}
+.scene{position:relative;width:min(100%,920px);height:min(100%,760px);display:flex;align-items:center;justify-content:center;perspective:1200px}
+.floor{position:absolute;left:-10%;right:-10%;bottom:-22%;height:52%;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 110px);transform:rotateX(69deg);transform-origin:bottom;filter:blur(.2px)}
+.vending{position:relative;width:min(94vw,650px);height:min(88vh,720px);min-height:590px;border-radius:26px;background:linear-gradient(145deg,#f2f4f6 0,#cbd1d8 45%,#9ca4ae 100%);box-shadow:0 35px 70px #000c, inset 2px 2px 2px #fff9,inset -5px -5px 10px #6d737d88;border:1px solid #89919b;display:grid;grid-template-columns:1fr 150px;grid-template-rows:1fr 124px;gap:14px;padding:19px;transform:translateZ(0);transition:transform .12s ease,filter .25s ease}
+.vending.shake{animation:shake .52s cubic-bezier(.36,.07,.19,.97)}
+.vending.kick{animation:kick .42s ease}
+.vending.poweroff{filter:brightness(.45) saturate(.65)}
+@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-9px) rotate(-.6deg)}30%{transform:translateX(8px) rotate(.5deg)}45%{transform:translateX(-6px)}60%{transform:translateX(5px)}75%{transform:translateX(-2px)}}
+@keyframes kick{0%,100%{transform:translateX(0)}20%{transform:translateX(7px) rotate(.25deg)}45%{transform:translateX(-12px) rotate(-.8deg)}70%{transform:translateX(5px)}}
+.brand{position:absolute;left:25px;top:6px;font-weight:900;font-size:12px;letter-spacing:.28em;color:#4c555f}.brand b{color:#1d252d}
+.glass{position:relative;background:linear-gradient(155deg,#101821,#05090d);border-radius:18px;border:5px solid #343b44;box-shadow:inset 0 0 0 1px #626b75,inset 0 12px 35px #000c,0 2px 0 #fff8;overflow:hidden;padding:18px 16px 12px}
+.glass:before{content:"";position:absolute;inset:-30% 35% 40% -25%;background:linear-gradient(105deg,transparent 28%,rgba(255,255,255,.10) 48%,transparent 58%);transform:rotate(-7deg);pointer-events:none}
+.shelf{height:25%;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end;border-bottom:4px solid #3b4650;box-shadow:0 4px 5px #000a;position:relative;padding:0 4px 12px;margin-bottom:2px}
+.slot{height:100%;display:flex;align-items:flex-end;justify-content:center;position:relative;opacity:.88;transition:.2s}
+.slot.empty{opacity:.15}.slot.locked:after{content:"";position:absolute;inset:13% 8% 7%;border:1px solid #6f7e8c55;border-radius:8px;background:repeating-linear-gradient(135deg,transparent 0 6px,#77838e10 6px 7px)}
+.pkg{width:56%;min-width:28px;height:67%;border-radius:10px 10px 7px 7px;background:linear-gradient(145deg,#e8ebef,#818b96);box-shadow:inset 0 0 0 1px #fff7,0 4px 12px #0009;position:relative;overflow:hidden}
+.pkg:before{content:"";position:absolute;left:10%;right:10%;top:12%;height:8%;border-radius:3px;background:#111b24aa}.pkg:after{content:"?";position:absolute;inset:28% 0 auto;text-align:center;font-size:clamp(20px,4vw,34px);font-weight:900;color:#1a242daa;text-shadow:0 1px #fff8}
+.slot:nth-child(4n+1) .pkg{background:linear-gradient(145deg,#cfd5da,#8795a1)}.slot:nth-child(4n+2) .pkg{background:linear-gradient(145deg,#d8d1c4,#8e877a)}.slot:nth-child(4n+3) .pkg{background:linear-gradient(145deg,#d0d8cf,#7f9082)}.slot:nth-child(4n+4) .pkg{background:linear-gradient(145deg,#d7cdd2,#8f7d86)}
+.coil{position:absolute;bottom:5px;width:70%;height:12px;border:2px solid #9ca9b4;border-radius:50%;opacity:.5}
+.panel{display:flex;flex-direction:column;gap:12px;min-width:0}
+.screenWrap{background:#222a31;border-radius:15px;padding:7px;box-shadow:inset 0 0 0 1px #606a74,0 2px 0 #fff9}
+.screen{height:285px;background:linear-gradient(180deg,#151c23,#0b1117);border-radius:10px;box-shadow:inset 0 0 22px #000;border:1px solid #080a0d;overflow:hidden;position:relative}
+.screen.off:after{content:"";position:absolute;inset:0;background:#020303f2;z-index:20}
+.ui{position:absolute;inset:0;padding:13px;display:flex;flex-direction:column;gap:10px}
+.status{display:flex;justify-content:space-between;align-items:center;color:#95a2ad;font-size:10px;letter-spacing:.08em}.live{display:flex;gap:5px;align-items:center}.dot{width:6px;height:6px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent)}
+.hero{border:1px solid #2b3945;background:linear-gradient(135deg,#17222c,#0b1218);border-radius:10px;padding:12px}.hero small{color:#81909d;font-size:9px;letter-spacing:.14em}.hero h1{font-size:18px;margin:4px 0 2px;letter-spacing:.03em}.hero p{font-size:10px;line-height:1.45;margin:0;color:#9aa7b2}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:7px}.readout div{border:1px solid #26333d;background:#0b1218;border-radius:7px;padding:8px}.readout span{display:block;color:#667683;font-size:8px}.readout b{font-size:15px;font-variant-numeric:tabular-nums}
+.touchGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:auto}.touchBtn{border:1px solid #31404b;background:#15202a;border-radius:8px;padding:10px 4px;font-weight:720;font-size:10px;cursor:pointer;transition:.12s}.touchBtn:active{transform:scale(.96);background:#22313c}.touchBtn.primary{background:var(--accent);border-color:var(--accent);color:#13170d}.touchBtn[disabled]{opacity:.35;pointer-events:none}
+.pay{background:#272f36;border-radius:13px;padding:9px;border:1px solid #747d87;box-shadow:inset 0 0 0 1px #0a0c0e,0 2px 0 #fff8}.paytop{height:28px;background:#0c1115;border-radius:7px;border:1px solid #050708;display:flex;align-items:center;justify-content:center;color:#65f495;font-size:9px;letter-spacing:.12em}.nfc{height:57px;margin-top:7px;border-radius:9px;background:linear-gradient(145deg,#4a535c,#1c2228);display:flex;align-items:center;justify-content:center;color:#9fa9b2;font-size:28px;border:1px solid #0a0d0f;cursor:pointer;user-select:none}.nfc:active{transform:scale(.98)}
+.coin{display:grid;grid-template-columns:1fr 36px;gap:8px}.coinSlot{height:55px;border-radius:10px;background:#22292f;border:1px solid #79828c;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 0 0 1px #090b0d}.coinSlot:before{content:"";width:8px;height:31px;background:#050708;border-radius:6px;box-shadow:0 0 0 2px #4c555e}.coinLabel{writing-mode:vertical-rl;font-size:7px;color:#66717c;letter-spacing:.15em;display:flex;align-items:center;justify-content:center}
+.service{display:flex;gap:6px;margin-top:auto}.mini{flex:1;border:1px solid #8e969f;background:#aeb5bc;color:#273039;border-radius:7px;padding:7px 2px;font-size:8px;font-weight:800;cursor:pointer;box-shadow:inset 0 1px #eaf0f4}.mini:active{transform:translateY(1px)}
+.hatch{grid-column:1/2;position:relative;background:linear-gradient(180deg,#3a4148,#161b1f);border:4px solid #777f88;border-radius:13px;box-shadow:inset 0 12px 24px #000d,0 2px 0 #fff9;cursor:pointer;overflow:hidden}.hatch:before{content:"PUSH";position:absolute;left:0;right:0;top:11px;text-align:center;color:#77828b;font-size:9px;letter-spacing:.3em}.hatchDoor{position:absolute;left:8%;right:8%;bottom:9px;height:63%;background:linear-gradient(#22282d,#0a0d0f);border-radius:7px 7px 15px 15px;transform-origin:top;transition:transform .25s;box-shadow:inset 0 8px 15px #000}.hatch.open .hatchDoor{transform:rotateX(62deg)}
+.lowerSide{display:flex;flex-direction:column;gap:8px}.vent{height:62px;background:repeating-linear-gradient(180deg,#525960 0 3px,#252b30 3px 7px);border-radius:9px;border:1px solid #858d95}.kickBtn{height:45px;border-radius:9px;background:#bcc2c8;color:#252b31;border:1px solid #7e868e;font-size:9px;font-weight:900;letter-spacing:.12em;cursor:pointer;box-shadow:inset 0 1px #fff}.kickBtn:active{transform:scale(.98)}
+.toast{position:absolute;left:50%;bottom:18px;transform:translate(-50%,18px);background:#090d11e8;border:1px solid #34414b;border-radius:999px;padding:9px 14px;font-size:11px;color:#e9eef2;opacity:0;transition:.22s;pointer-events:none;white-space:nowrap;z-index:50}.toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{position:absolute;inset:0;background:#080b0fe8;backdrop-filter:blur(12px);z-index:80;display:none;align-items:center;justify-content:center;padding:22px}.overlay.show{display:flex}.card{width:min(100%,470px);max-height:88%;overflow:auto;background:linear-gradient(145deg,#171e25,#0d1217);border:1px solid #37434d;border-radius:22px;padding:22px;box-shadow:0 28px 60px #000}.card .kicker{font-size:9px;letter-spacing:.2em;color:#7b8995}.card h2{font-size:25px;margin:6px 0 8px}.card p{font-size:13px;color:#a9b4bd;line-height:1.6;margin:4px 0 14px}.resultBox{border:1px solid #2e3b45;background:#0b1116;border-radius:14px;padding:14px;margin:12px 0}.resultBox b{font-size:16px}.resultBox small{display:block;color:#7e8b95;margin-top:5px;line-height:1.5}.again{width:100%;border:0;border-radius:12px;padding:13px;background:var(--accent);color:#11150d;font-weight:900;cursor:pointer}
+#start{display:flex}.startLogo{width:60px;height:60px;border-radius:17px;background:var(--accent);color:#10140c;display:grid;place-items:center;font-size:30px;font-weight:1000;margin-bottom:14px}.startHint{font-size:11px!important;color:#77848f!important}.startBtn{width:100%;margin-top:12px;border:0;border-radius:12px;padding:14px;background:#eef2f5;color:#111820;font-weight:900;cursor:pointer}.startBtn:active{transform:scale(.99)}
+.secretLight{position:absolute;right:10px;top:10px;width:4px;height:4px;border-radius:50%;background:#d2ff57;box-shadow:0 0 9px #d2ff57;opacity:.65}
+@media(max-width:600px){
+ #app{padding:7px}.scene{height:100%}.vending{width:100%;height:min(94vh,760px);min-height:570px;grid-template-columns:1fr 116px;grid-template-rows:1fr 105px;gap:8px;padding:12px;border-radius:20px}.brand{left:18px;top:2px;font-size:9px}.glass{padding:12px 9px 8px;border-width:4px}.shelf{gap:5px;padding-bottom:9px}.pkg{width:62%}.panel{gap:7px}.screenWrap{padding:5px}.screen{height:255px}.ui{padding:9px;gap:7px}.hero{padding:9px}.hero h1{font-size:15px}.readout div{padding:6px}.readout b{font-size:12px}.touchBtn{padding:8px 2px}.pay{padding:6px}.nfc{height:43px}.coinSlot{height:44px}.coinSlot:before{height:24px}.service{gap:3px}.mini{font-size:7px;padding:6px 1px}.kickBtn{height:35px}.vent{height:55px}
+}
+</style>
+</head>
+<body>
+<noscript><div style="position:fixed;inset:0;z-index:9999;background:#090b0f;color:#eef3f6;padding:32px;font-family:system-ui">这个预览器没有运行 JavaScript。请用 Safari/Chrome 打开 index.html。</div></noscript>
+<div id="app">
+  <div class="scene">
+    <div class="floor"></div>
+    <div class="vending" id="machine">
+      <div class="brand"><b>ZERO</b> / AUTOMAT</div>
+      <section class="glass" id="glass"></section>
+      <aside class="panel">
+        <div class="screenWrap"><div class="screen" id="screen"><div class="secretLight"></div><div class="ui">
+          <div class="status"><span>ZERO / 04</span><span class="live"><i class="dot"></i><span id="statusText">ONLINE</span></span></div>
+          <div class="hero"><small>UNCLAIMED STOCK</small><h1 id="headline">请选择操作</h1><p id="subline">库存识别异常。机器仍接受交易。</p></div>
+          <div class="readout"><div><span>CREDIT</span><b id="credit">¥0</b></div><div><span>FAULT</span><b id="fault">00</b></div></div>
+          <div class="touchGrid">
+            <button class="touchBtn primary" data-act="buy">购买</button>
+            <button class="touchBtn" data-act="reroll">换一格</button>
+            <button class="touchBtn" data-act="refund">退款</button>
+            <button class="touchBtn" data-act="diagnose">诊断</button>
+          </div>
+        </div></div></div>
+        <div class="pay"><div class="paytop">TAP / READY</div><div class="nfc" id="nfc">)))</div></div>
+        <div class="coin"><div class="coinSlot" id="coin"></div><div class="coinLabel">COIN</div></div>
+        <div class="service"><button class="mini" id="power">POWER</button><button class="mini" id="back">BACK</button><button class="mini" id="shake">SHAKE</button></div>
+      </aside>
+      <div class="hatch" id="hatch"><div class="hatchDoor"></div></div>
+      <div class="lowerSide"><div class="vent"></div><button class="kickBtn" id="kick">KICK PANEL</button></div>
+      <div class="toast" id="toast"></div>
+    </div>
+    <div class="overlay show" id="start"><div class="card">
+      <div class="startLogo">0</div><div class="kicker">SELF-SERVICE / UNIT 04</div><h2>零号售货机</h2>
+      <p>这台机器没有商品名。它看起来还能用。</p><p class="startHint">直接碰机器。能按的地方不止屏幕。</p>
+      <button class="startBtn" id="startBtn" type="button" onclick="document.getElementById('start').classList.remove('show')">开始</button>
+    </div></div>
+    <div class="overlay" id="ending"><div class="card" id="endingCard"></div></div>
+  </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const machine=$('#machine'), glass=$('#glass'), screen=$('#screen'), toast=$('#toast');
+const creditEl=$('#credit'), faultEl=$('#fault'), headline=$('#headline'), subline=$('#subline'), statusText=$('#statusText');
+const ending=$('#ending'), endingCard=$('#endingCard');
+const state={credit:0,fault:0,ops:0,power:true,backOpen:false,bought:0,seed:Math.random(),trace:{pay:0,coin:0,shake:0,kick:0,power:0,back:0,refund:0,diag:0,reroll:0,hatch:0,buy:0,rapid:0,hesitate:0},last:0,stock:16,ended:false};
+const men=[
+ {n:'夜班维修员',d:'三十九岁。话少，修东西很快，讨厌别人碰他的工具。',k:'repair'},
+ {n:'退役领航员',d:'四十四岁。方向感近乎可怕，遇事先观察出口。',k:'route'},
+ {n:'灰市估价师',d:'三十七岁。认货很准，开价从不解释。',k:'value'},
+ {n:'重型运输队长',d:'四十一岁。两米左右，耐心只留给真正麻烦的事。',k:'force'},
+ {n:'私人安保主管',d:'三十八岁。习惯站在门边，先看手再看脸。',k:'guard'},
+ {n:'老牌魔术师',d:'四十二岁。手很稳，擅长让东西在眼前消失。',k:'trick'},
+ {n:'荒原气象员',d:'三十五岁。常年在外站，判断天气比判断人可靠。',k:'wait'},
+ {n:'机械义肢技师',d:'四十岁。脾气硬，做出的关节却极其精细。',k:'machine'},
+ {n:'港口调度官',d:'四十六岁。能同时记住十几条路线和所有迟到的人。',k:'control'},
+ {n:'旧城债务代理人',d:'三十六岁。西装很旧，账记得一分不差。',k:'money'},
+ {n:'野外法医',d:'四十三岁。面对怪事很平静，随身带第二副手套。',k:'inspect'},
+ {n:'前竞技格斗教练',d:'三十九岁。肩背很宽，不喜欢无意义的挑衅。',k:'kick'},
+ {n:'地下电工',d:'三十四岁。能在全黑里拆配电箱，笑点很低。',k:'power'},
+ {n:'博物馆押运员',d:'四十五岁。只相信封条、重量和亲手确认。',k:'hatch'},
+ {n:'事故调查员',d:'四十岁。越是坏掉的东西，他越想知道原因。',k:'fault'},
+ {n:'边境旅店老板',d:'四十七岁。体格壮，收留人时从不问第一遍名字。',k:'random'},
+ {n:'深海打捞潜水员',d:'三十八岁。肺活量惊人，对昂贵东西反而没兴趣。',k:'risk'},
+ {n:'夜间列车长',d:'四十二岁。守时得过分，偶尔会给人留一站。',k:'timing'},
+ {n:'古董锁匠',d:'三十七岁。细长工具装满一整排皮袋，几乎没有打不开的锁。',k:'back'},
+ {n:'高层玻璃清洁工',d:'三十五岁。完全不恐高，休息时喜欢坐在危险边缘。',k:'calm'}
+ ];
+const endings=[
+ ['正规交易','机器接受了你的交易记录。它最后真的吐出了东西。'],
+ ['暴力售后','机身留下了明显新伤。某个内部传感器似乎因此恢复。'],
+ ['维修模式','你把消费者能碰的和不能碰的地方都碰了一遍。机器决定换一种方式处理你。'],
+ ['断电取货','系统日志缺了一大块。恰好也是最关键的一块。'],
+ ['零元购失败未遂','你做了很多可疑操作，但账面居然还能对上。'],
+ ['机器观察员','你花在研究故障上的时间，比花钱多得多。']
+ ];
+function renderStock(){glass.innerHTML='';for(let r=0;r<4;r++){const shelf=document.createElement('div');shelf.className='shelf';for(let c=0;c<4;c++){const s=document.createElement('div');s.className='slot '+(((r*4+c)>=state.stock)?'empty ':'')+((r+c)%5===0?'locked':'');s.innerHTML='<div class="pkg"></div><div class="coil"></div>';shelf.appendChild(s)}glass.appendChild(shelf)}}
+function sync(){creditEl.textContent='¥'+state.credit;faultEl.textContent=String(state.fault).padStart(2,'0');statusText.textContent=state.power?'ONLINE':'OFFLINE';screen.classList.toggle('off',!state.power);machine.classList.toggle('poweroff',!state.power)}
+let toastTimer; function say(t){toast.textContent=t;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1200)}
+function note(key){const now=performance.now();if(state.last&&now-state.last<520)state.trace.rapid++;if(state.last&&now-state.last>5000)state.trace.hesitate++;state.last=now;state.trace[key]=(state.trace[key]||0)+1;state.ops++;if(state.ops>=18&&!state.ended)setTimeout(finish,500)}
+function fault(n=1){state.fault=Math.min(99,state.fault+n);sync()}
+function anim(cls){machine.classList.remove(cls);void machine.offsetWidth;machine.classList.add(cls)}
+function dispense(){if(state.stock<=0){say('库存空');return false}state.stock--;state.bought++;renderStock();const h=$('#hatch');h.classList.add('open');setTimeout(()=>h.classList.remove('open'),850);return true}
+function act(type){if(state.ended)return;note(type);
+ if(type==='buy'){
+   if(!state.power){say('屏幕没电');return}
+   if(state.credit<10){say('余额不足');fault();return}
+   state.credit-=10; if(dispense()){headline.textContent='出货中';subline.textContent='请从下方取货仓取走。';say('交易完成')}else fault(2); sync();
+ }
+ if(type==='reroll'){if(!state.power){say('无响应');return}state.trace.reroll++;fault(Math.random()<.4?1:0);headline.textContent='重新定位库存';subline.textContent=Math.random()<.5?'电机重新扫描了一排货道。':'有一格商品在屏幕里消失又出现。';say('货道已切换')}
+ if(type==='refund'){state.trace.refund++;if(state.credit>0){const x=state.credit;state.credit=0;say('退回 ¥'+x)}else{say('没有可退余额');fault()}sync()}
+ if(type==='diagnose'){state.trace.diag++;headline.textContent='FAULT '+String(state.fault).padStart(2,'0');subline.textContent=['货道重量不一致。','后盖传感器状态异常。','支付模块正常，出货记录缺失。','库存图像无法识别。'][Math.floor(Math.random()*4)];say('诊断完成')}
+}
+function chooseMan(){const t=state.trace;const score={repair:t.diag+t.back*2,machine:t.diag+t.power,value:t.buy+t.refund,money:t.refund*2+t.coin,force:t.shake+t.kick*2,kick:t.kick*2,guard:t.hatch+t.back,inspect:t.diag*2,fault:state.fault+ t.diag,back:t.back*3,power:t.power*3,hatch:t.hatch*3,wait:t.hesitate,control:t.buy+t.reroll,route:t.reroll+state.bought,trick:t.rapid+rnd(2),risk:t.kick+t.power,calm:t.hesitate+t.diag,timing:t.rapid>t.hesitate?2:0,random:1};
+ let best=men[0],bs=-1;for(const m of men){const s=(score[m.k]||0)+Math.random()*2.6;if(s>bs){bs=s;best=m}}return best}
+function chooseEnding(){const t=state.trace;if(t.back>=2||t.diag>=4)return endings[2];if(t.power>=3)return endings[3];if(t.kick+t.shake>=5)return endings[1];if(t.diag>=3&&t.buy<=1)return endings[5];if(t.refund>=2||state.credit===0&&t.buy===0)return endings[4];return endings[0]}
+function rnd(n){return Math.floor(Math.random()*n)}
+function finish(){if(state.ended)return;state.ended=true;const man=chooseMan(), ed=chooseEnding();endingCard.innerHTML='<div class="kicker">TRANSACTION CLOSED</div><h2>'+ed[0]+'</h2><p>'+ed[1]+'</p><div class="resultBox"><b>'+man.n+'</b><small>'+man.d+'</small></div><div class="resultBox"><b>机器记录</b><small>投入 ¥'+(state.trace.coin*5+state.trace.pay*10)+' · 成功出货 '+state.bought+' · 故障码 '+state.fault+'</small></div><button class="again" id="again">再来一次</button>';ending.classList.add('show');$('#again').onclick=()=>location.reload()}
+renderStock();sync();
+const startBtn=$('#startBtn');
+function dismissStart(){const start=$('#start');if(start)start.classList.remove('show');say('机器已唤醒')}
+if(startBtn){
+ startBtn.addEventListener('click',dismissStart,{passive:true});
+ startBtn.addEventListener('touchend',function(e){e.preventDefault();dismissStart()},{passive:false});
+}
+document.querySelectorAll('.touchBtn').forEach(b=>b.onclick=()=>act(b.dataset.act));
+$('#coin').onclick=()=>{if(state.ended)return;note('coin');state.credit+=5;say('投入 ¥5');sync()};
+$('#nfc').onclick=()=>{if(state.ended)return;note('pay');if(!state.power){say('支付终端离线');fault();return}state.credit+=10;say('已预授权 ¥10');sync()};
+$('#shake').onclick=()=>{if(state.ended)return;note('shake');anim('shake');fault(Math.random()<.7?1:0);if(Math.random()<.18){dispense();say('里面掉下来什么东西')}else say('机身晃了两下')};
+$('#kick').onclick=()=>{if(state.ended)return;note('kick');anim('kick');fault(1+Math.floor(Math.random()*2));if(Math.random()<.22){dispense();say('咣——取货仓有动静')}else say('很响。没掉。')};
+$('#power').onclick=()=>{if(state.ended)return;note('power');state.power=!state.power;if(!state.power){say('电源切断')}else{fault(Math.random()<.5?1:0);say('系统重启')}sync()};
+$('#back').onclick=()=>{if(state.ended)return;note('back');state.backOpen=!state.backOpen;fault(state.backOpen?2:0);say(state.backOpen?'后盖被你掀开了一条缝':'后盖扣回去了')};
+$('#hatch').onclick=()=>{if(state.ended)return;note('hatch');const h=$('#hatch');h.classList.add('open');setTimeout(()=>h.classList.remove('open'),500);if(Math.random()<.12&&state.stock<16){say('摸到一张皱掉的标签')}else say('里面是空的')};
+})();
+</script>
+</body>
+</html>
